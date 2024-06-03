@@ -202,8 +202,8 @@ echo "Results will be stored at $save_dir/flores/en-$lang/$ntrain-shot/"
 python3 -m eval.flores.$run_eval \
 	--ntrain $ntrain \
 	--save_dir "${save_dir}/flores/${ntrain}-shot/" \
-	--src_lang en
-	--tgt_lang $lang
+	--src_lang en \
+	--tgt_lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -214,8 +214,8 @@ echo "Results will be stored at $save_dir/flores/$lang-en/$ntrain-shot/"
 python3 -m eval.flores.$run_eval \
 	--ntrain $ntrain \
 	--save_dir "${save_dir}/flores/${ntrain}-shot/" \
-	--src_lang $lang
-	--tgt_lang en
+	--src_lang $lang \
+	--tgt_lang en \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -232,8 +232,8 @@ echo "Results will be stored at $save_dir/in22-gen/en-$lang/$ntrain-shot/"
 python3 -m eval.in22.$run_eval \
 	--ntrain $ntrain \
 	--save_dir "${save_dir}/in22-gen/${ntrain}-shot/" \
-	--src_lang en
-	--tgt_lang $lang
+	--src_lang en \
+	--tgt_lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -244,8 +244,8 @@ echo "Results will be stored at $save_dir/in22-gen/$lang-en/$ntrain-shot/"
 python3 -m eval.in22.$run_eval \
 	--ntrain $ntrain \
 	--save_dir "${save_dir}/in22-gen/${ntrain}-shot/" \
-	--src_lang $lang
-	--tgt_lang en
+	--src_lang $lang \
+	--tgt_lang en \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -272,7 +272,7 @@ python3 -m eval.indicqa.$run_eval \
 	--max_context_length 768 \
 	--no_context \
 	--save_dir "${save_dir}/indicqa/no-context/${ntrain}-shot/" \
-	--lang $lang
+	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -291,7 +291,7 @@ python3 -m eval.indicqa.$run_eval \
 	--max_context_length 768 \
 	--no_context \
 	--save_dir "${save_dir}/indicqa/with-context/${ntrain}-shot/" \
-	--lang $lang
+	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -309,7 +309,7 @@ python3 -m eval.indicheadline.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 512 \
 	--save_dir "${save_dir}/indicheadline/${ntrain}-shot/" \
-	--lang $lang
+	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -327,7 +327,7 @@ python3 -m eval.indicwikibio.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 512 \
 	--save_dir "${save_dir}/indicwikibio/${ntrain}-shot/" \
-	--lang $lang
+	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
