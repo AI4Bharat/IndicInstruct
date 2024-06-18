@@ -16,28 +16,28 @@ from eval.utils import (
     dynamic_import_function,
 )
 
-choices = ["A", "B"]
-choices_map = {True: "A", False: "B"}
+choices = ["A", "B", "C", "D", "E"]
+num_to_letter = {"1": "A", "2": "B", "3": "C", "4": "D", "5": "E"}
 
 
-def format_example(passage, question, label=None):
-    prompt = f"Passage: {passage}\nQuestion: {question.strip()}\n"
-    for choice, answer in zip(choices, ["Yes", "No"]):
+def format_example(question, answers, label=None):
+    prompt = f"{question.strip()}\n"
+    for choice, answer in zip(choices, answers):
         prompt += f"{choice}. {answer.strip()}\n"
     prompt += "\nAnswer:"
     if label is not None:
-        label = choices_map[label]
+        label = num_to_letter.get(label, label)
         prompt += " {label}\n\n".format(label=label)
     return prompt
 
 
 def gen_prompt(dev_data, k=-1):
-    prompt = f"The following are binary yes/no choice questions (with answers).\n\n"
+    prompt = f"The following are multiple choice questions (with answers) requiring common sense.\n\n"
     if k > 0:
         exemplars = dev_data.select(range(k))
         for example in exemplars:
             prompt += format_example(
-                passage=example["itv2 hi passage"], question=example["itv2 hi question"], label=example["answer"]
+                question=example["question"], answers=example["choices"]["text"], label=example["answerKey"]
             )
     return prompt
 
@@ -60,16 +60,17 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("Thanmay/boolq-translated")
-    dev_data = dataset["train"]
-    test_data = dataset["validation"]
 
+    if args.lang=="en":
+        dataset = load_dataset("commonsense_qa")
+    else:
+        dataset = load_dataset("ai4bharat/commonsense_qa-translated", f"{args.lang}-{args.script}")
+    dev_data = dataset["validation"]
+    test_data = dataset["test"]
     prompts = []
     for i, example in enumerate(test_data):
         k = args.ntrain
-        prompt_end = format_example(
-            passage=example["itv2 hi passage"], question=example["itv2 hi question"], label=None
-        )
+        prompt_end = format_example(question=example["question"], answers=example["choices"]["text"], label=None)
         train_prompt = gen_prompt(dev_data.shuffle(seed=args.seed), k)
         prompt = train_prompt + prompt_end
 
@@ -83,43 +84,55 @@ def main(args):
 
         tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         # make sure every prompt is less than 2048 tokens
-        while len(tokenized_prompt) > 2048:
-            k -= 1
-            train_prompt = gen_prompt(dev_data, k)
-            prompt = train_prompt + prompt_end
-
-            if args.use_chat_format:
-                messages = [{"role": "user", "content": prompt}]
-                prompt = chat_formatting_function(messages, add_bos=False)
-                if prompt[-1] in ["\n", " "]:
-                    prompt += "The answer is: "
-                else:
-                    prompt += " The answer is: "
-
-            tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
+        # while len(tokenized_prompt) > 2048:
+        #    k -= 1
+        #    train_prompt = gen_prompt(dev_data, k
+        #    prompt = train_prompt + prompt_end
+        #
+        #    if args.use_chat_format:
+        #        messages = [{"role": "user", "content": prompt}]
+        #        prompt = chat_formatting_function(messages, add_bos=False)
+        #        if prompt[-1] in ["\n", " "]:
+        #            prompt += "The answer is: "
+        #        else:
+        #            prompt += " The answer is: "
+        #
+        #    tokenized_prompt = tokenizer(prompt, truncation=False, add_special_tokens=False).input_ids
         prompts.append(prompt)
 
     # get the answer for all examples
     # adding a prefix space here, as that's expected from the prompt
     # TODO: should raise a warning if this returns more than one token
-    answer_choice_ids = [tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in choices]
-    pred_indices, all_probs = get_next_word_predictions(
-        model,
-        tokenizer,
-        prompts,
-        candidate_token_ids=answer_choice_ids,
-        return_token_predictions=False,
-        batch_size=args.eval_batch_size,
-    )
+    # Label space is different for different examples so need to individually
+    # run the likelihood for each example
+    pred_indices = []
+    for prompt, example in tqdm(zip(prompts, test_data)):
+        answer_choices = choices
+        if len(example["choices"]["label"]) == 4:
+            answer_choices = answer_choices[:4]
+
+        answer_choice_ids = [
+            tokenizer.encode(answer_choice, add_special_tokens=False)[-1] for answer_choice in answer_choices
+        ]
+        pred_index, all_prob = get_next_word_predictions(
+            model,
+            tokenizer,
+            [prompt],
+            candidate_token_ids=answer_choice_ids,
+            return_token_predictions=False,
+            disable_tqdm=True,
+        )
+        pred_indices.append(pred_index[0])
 
     # get the metrics
-    ground_truths = [choices.index(choices_map[example["answer"]]) for example in test_data]
+    ground_truths = [num_to_letter.get(example["answerKey"], example["answerKey"]) for example in test_data]
+    ground_truths = [choices.index(ground_truth) for ground_truth in ground_truths]
     predictions = [pred_index for pred_index in pred_indices]
     metrics = {
         "accuracy": accuracy_score(ground_truths, predictions),
-        "precision": precision_score(ground_truths, predictions),
-        "recall": recall_score(ground_truths, predictions),
-        "f1": f1_score(ground_truths, predictions),
+        "precision": precision_score(ground_truths, predictions, average="macro"),
+        "recall": recall_score(ground_truths, predictions, average="macro"),
+        "f1": f1_score(ground_truths, predictions, average="macro"),
     }
     for k, v in metrics.items():
         print(f"{k}: {v:.4f}")
@@ -133,7 +146,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--save_dir", type=str, default="results/boolq-hi/llama-7B/")
+    parser.add_argument("--save_dir", type=str, default="results/mmlu/llama-7B/")
+    parser.add_argument("--lang", type=str, choices=["hi", "en", "gu", "ml", "mr", "ta"], help="Which language to evaluate?")
+    parser.add_argument("--script", type=str, default="native", choices=["roman", "native"])
     parser.add_argument(
         "--model_name_or_path",
         type=str,
@@ -145,6 +160,11 @@ if __name__ == "__main__":
         type=str,
         default=None,
         help="if specified, we will load the tokenizer from here.",
+    )
+    parser.add_argument(
+        "--n_instances",
+        type=int,
+        help="if specified, a maximum of n_instances per subject will be used for the evaluation.",
     )
     parser.add_argument("--eval_batch_size", type=int, default=1, help="batch size for evaluation.")
     parser.add_argument(

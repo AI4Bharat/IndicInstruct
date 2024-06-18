@@ -59,17 +59,10 @@ def main(args):
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
 
-    dataset = load_dataset("Thanmay/indic-qa-hindi")
-    for split in dataset.column_names:
-        column_names = dataset[split].column_names
-        itv2_column_names = []
-        for column_name in column_names:
-            if "itv2 hi" in column_name.lower():
-                itv2_column_names.append(column_name)
-        remove_column_names = [x[8:] for x in itv2_column_names]
-        dataset[split] = dataset[split].remove_columns(remove_column_names)
-        for itv2_column_name in itv2_column_names:
-            dataset[split] = dataset[split].rename_column(itv2_column_name, itv2_column_name[8:])
+    if args.script == "native":
+        dataset = load_dataset("ai4bharat/IndicQA", f"indicqa.{args.lang}")
+    else:
+        dataset = load_dataset("ai4bharat/IndicQA-romanized", f"indicqa.{args.lang}")
 
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
@@ -184,6 +177,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--lang", type=str, default="hi", choices=["as", "bn", "gu", "hi", "kn", "ml", "mr", "or", "pa", "ta", "te"]
     )
+    parser.add_argument("--script", type=str, default="native", choices=["native", "romanized"])
     parser.add_argument("--save_dir", type=str, default="results/mmlu/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",

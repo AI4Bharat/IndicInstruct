@@ -58,7 +58,10 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("boolq")
+    if args.lang == "en":
+        dataset = load_dataset("boolq")
+    else:
+        dataset = load_dataset("ai4bharat/boolq-translated", f"{args.lang}-{args.script}")
     dev_data = dataset["train"]
     test_data = dataset["validation"]
 
@@ -129,6 +132,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--lang", type=str, choices=["hi", "en", "ml", "gu", "ta", "mr"])
+    parser.add_argument("--script", type=str, default="native", choices=["roman", "native"])
     parser.add_argument("--save_dir", type=str, default="results/boolq/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",

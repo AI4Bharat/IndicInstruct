@@ -61,7 +61,12 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset(args.dataset, f"ARC-{args.subset.capitalize()}")
+    if "ai4bharat" in args.dataset:
+        dataset = load_dataset(args.dataset, f"{args.lang}-{args.script}")
+    else:
+        dataset, subset = args.dataset.split("-")
+        dataset = load_dataset(dataset, f"ARC-{subset.capitalize()}")
+        del subset
     dev_data = dataset["validation"]
     test_data = dataset["test"]
 
@@ -138,8 +143,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
-    parser.add_argument("--dataset", type=str, default="easy", choices=["ai2_arc", "ai4bharat/ai2_arc-hi"])
-    parser.add_argument("--subset", type=str, default="easy", choices=["easy", "challenge"])
+    parser.add_argument("--dataset", type=str, choices=["ai2_arc-easy", "ai2_arc-challenge", "ai4bharat/ai2_arc-easy-translated", "ai4bharat/ai2_arc-challenge-translated"])
+    parser.add_argument("--script", type=str, default="native", choices=["roman", "native"])
+    parser.add_argument("--lang", type=str, choices=["hi", "ml", "gu", "ta", "mr"])
     parser.add_argument("--save_dir", type=str, default="results/mmlu/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",

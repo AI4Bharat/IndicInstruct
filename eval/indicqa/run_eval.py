@@ -54,7 +54,10 @@ def main(args):
 
     chat_formatting_function = dynamic_import_function(args.chat_formatting_function) if args.use_chat_format else None
 
-    dataset = load_dataset("ai4bharat/IndicQA", f"indicqa.{args.lang}")
+    if args.script == "native":
+        dataset = load_dataset("ai4bharat/IndicQA", f"indicqa.{args.lang}")
+    else:
+        dataset = load_dataset("ai4bharat/IndicQA-romanized", f"indicqa.{args.lang}")
     dataset = dataset.map(lambda x: {"context": x["context"].strip()})
     dataset = dataset.map(lambda x: {"question": x["question"].strip()})
     test_data = dataset["test"]
@@ -164,8 +167,9 @@ if __name__ == "__main__":
     )
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument(
-        "--lang", type=str, default="hi", choices=["as", "bn", "gu", "hi", "kn", "ml", "mr", "or", "pa", "ta", "te"]
+        "--lang", type=str, choices=["as", "bn", "gu", "hi", "kn", "ml", "mr", "or", "pa", "ta", "te"]
     )
+    parser.add_argument("--script", default="native", choices=["native", "roman"])
     parser.add_argument("--save_dir", type=str, default="results/indicqa/llama-7B/")
     parser.add_argument(
         "--model_name_or_path",
