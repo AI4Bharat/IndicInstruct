@@ -7,7 +7,7 @@ model_name_or_path=$1 # Model Path or Hugging Face name.
 save_dir=$2 # Root directory to save results. Each task will be a subfolder where the respective results are stored. Caution: Ensure that the directory doesn't exist to avoid overwriting results.
 chat_formatting_function=$3 # Optional. Options = [tulu, llama2, gemma]. If not provided, model will not use chat format.
 eval_batch_size=10 # Batch Size to be used for evaluating.
-run_eval=run_multi_turn_eval # Options = [run_eval, run_multi_turn_eval] Used for chat variants; Ignore for base model evaluations.
+run_eval=run_eval # Options = [run_eval, run_multi_turn_eval] Used for chat variants; Ignore for base model evaluations.
 ntrains=(0) # Number of few-shot examples to be used for evaluation.
 langs=(hi) # Languages to be evaluated.
 
