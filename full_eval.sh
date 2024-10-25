@@ -40,7 +40,7 @@ echo "Evaluating ${ntrain}-shot IndicSentiment (${lang})..."
 echo "Results will be stored at $save_dir/indicsentiment/$lang/$ntrain-shot/"
 python3 -m eval.indicsentiment.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/indicsentiment/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicsentiment/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -285,12 +285,12 @@ for ntrain in ${ntrains[@]}; do
 for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot IndicQA with context..."
-echo "Results will be stored at ${save_dir}/indicqa/with-context/$ntrain-shot/"
+echo "Results will be stored at ${save_dir}/indicqa/$lang/with-context/$ntrain-shot/"
 python3 -m eval.indicqa.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 768 \
 	--no_context \
-	--save_dir "${save_dir}/indicqa/with-context/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicqa/$lang/with-context/${ntrain}-shot/" \
 	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
@@ -304,11 +304,11 @@ for ntrain in ${ntrains[@]}; do
 for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot IndicHeadline..."
-echo "Results will be stored at ${save_dir}/indicheadline/$ntrain-shot/"
+echo "Results will be stored at ${save_dir}/indicheadline/$lang/$ntrain-shot/"
 python3 -m eval.indicheadline.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 512 \
-	--save_dir "${save_dir}/indicheadline/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicheadline/$lang/${ntrain}-shot/" \
 	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
@@ -322,11 +322,11 @@ for ntrain in ${ntrains[@]}; do
 for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot IndicWikiBio..."
-echo "Results will be stored at ${save_dir}/indicwikibio/$ntrain-shot/"
+echo "Results will be stored at ${save_dir}/indicwikibio/$lang/$ntrain-shot/"
 python3 -m eval.indicwikibio.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 512 \
-	--save_dir "${save_dir}/indicwikibio/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicwikibio/$lang/${ntrain}-shot/" \
 	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
