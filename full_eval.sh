@@ -57,7 +57,7 @@ echo "Evaluating ${ntrain}-shot IndicCOPA (${lang})..."
 echo "Results will be stored at $save_dir/indiccopa/$lang/$ntrain-shot/"
 python3 -m eval.indiccopa.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/indiccopa/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indiccopa/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -74,7 +74,7 @@ echo "Evaluating ${ntrain}-shot IndicXNLI (${lang})..."
 echo "Results will be stored at $save_dir/indicxnli/$lang/$ntrain-shot/"
 python3 -m eval.indicxnli.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/indicxnli/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicxnli/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -91,7 +91,7 @@ echo "Evaluating ${ntrain}-shot IndicXParaphrase (${lang})..."
 echo "Results will be stored at $save_dir/indicxparaphrase/$lang/$ntrain-shot/"
 python3 -m eval.indicxparaphrase.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/indicxparaphrase/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicxparaphrase/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
@@ -110,35 +110,40 @@ done
 
 # MMLU
 for ntrain in ${ntrains[@]}; do
+for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot MMLU..."
 echo "Results will be stored at $save_dir/mmlu/$lang/$ntrain-shot/"
 python3 -m eval.mmlu.$run_eval \
 	--ntrain $ntrain \
     	--data_dir data/eval/mmlu \
-	--save_dir "${save_dir}/mmlu/${ntrain}-shot/" \
+	--save_dir "${save_dir}/mmlu/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
 	$chat_formatting_function
 done
+done
 
 # BoolQ
 for ntrain in ${ntrains[@]}; do
+for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot BoolQ..."
 echo "Results will be stored at $save_dir/boolq/$lang/$ntrain-shot/"
 python3 -m eval.boolq.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/boolq/${ntrain}-shot/" \
+	--save_dir "${save_dir}/boolq/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
 	$chat_formatting_function
 done
+done
 
 # ARC-Easy
 for ntrain in ${ntrains[@]}; do
+for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot ARC-Easy..."
 echo "Results will be stored at $save_dir/arc-easy/$lang/$ntrain-shot/"
@@ -146,17 +151,19 @@ python3 -m eval.arc.$run_eval \
 	--ntrain $ntrain \
     	--dataset "ai2_arc" \
     	--subset "easy" \
-	--save_dir "${save_dir}/arc-easy/${ntrain}-shot/" \
+	--save_dir "${save_dir}/arc-easy/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
 	$chat_formatting_function
+done
 done
 
 
 
 # ARC-Challenge
 for ntrain in ${ntrains[@]}; do
+for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot ARC-Challenge..."
 echo "Results will be stored at $save_dir/arc-challenge/$lang/$ntrain-shot/"
@@ -164,25 +171,28 @@ python3 -m eval.arc.$run_eval \
 	--ntrain $ntrain \
     	--dataset "ai2_arc" \
     	--subset "challenge" \
-	--save_dir "${save_dir}/arc-challenge/${ntrain}-shot/" \
+	--save_dir "${save_dir}/arc-challenge/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
 	$chat_formatting_function
 done
+done
 
 # Hellaswag
 for ntrain in ${ntrains[@]}; do
+for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot Hellaswag..."
 echo "Results will be stored at $save_dir/hellaswag/$lang/$ntrain-shot/"
 python3 -m eval.hellaswag.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/hellaswag/${ntrain}-shot/" \
+	--save_dir "${save_dir}/hellaswag/$lang/${ntrain}-shot/" \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
 	--eval_batch_size $eval_batch_size \
 	$chat_formatting_function
+done
 done
 
 
@@ -201,7 +211,7 @@ echo "Evaluating ${ntrain}-shot FLORES from en-$lang..."
 echo "Results will be stored at $save_dir/flores/en-$lang/$ntrain-shot/"
 python3 -m eval.flores.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/flores/${ntrain}-shot/" \
+	--save_dir "${save_dir}/flores/en-$lang/${ntrain}-shot/" \
 	--src_lang en \
 	--tgt_lang $lang \
 	--model_name_or_path $model_name_or_path \
@@ -213,7 +223,7 @@ echo "Evaluating ${ntrain}-shot FLORES from $lang-en..."
 echo "Results will be stored at $save_dir/flores/$lang-en/$ntrain-shot/"
 python3 -m eval.flores.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/flores/${ntrain}-shot/" \
+	--save_dir "$save_dir/flores/$lang-en/$ntrain-shot/" \
 	--src_lang $lang \
 	--tgt_lang en \
 	--model_name_or_path $model_name_or_path \
@@ -231,7 +241,7 @@ echo "Evaluating ${ntrain}-shot FLORES from en-$lang..."
 echo "Results will be stored at $save_dir/in22-gen/en-$lang/$ntrain-shot/"
 python3 -m eval.in22.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/in22-gen/${ntrain}-shot/" \
+	--save_dir "$save_dir/in22-gen/en-$lang/$ntrain-shot/" \
 	--src_lang en \
 	--tgt_lang $lang \
 	--model_name_or_path $model_name_or_path \
@@ -243,7 +253,7 @@ echo "Evaluating ${ntrain}-shot FLORES from $lang-en..."
 echo "Results will be stored at $save_dir/in22-gen/$lang-en/$ntrain-shot/"
 python3 -m eval.in22.$run_eval \
 	--ntrain $ntrain \
-	--save_dir "${save_dir}/in22-gen/${ntrain}-shot/" \
+	--save_dir "$save_dir/in22-gen/$lang-en/$ntrain-shot/" \
 	--src_lang $lang \
 	--tgt_lang en \
 	--model_name_or_path $model_name_or_path \
@@ -255,7 +265,7 @@ done
 
 
 
-
+eval_batch_size=64 # Batch Size to be used for evaluating.
 
 # --------------------------------------------------------------------------------
 #					Indic NLG
@@ -266,12 +276,12 @@ for ntrain in ${ntrains[@]}; do
 for lang in ${langs[@]}; do
 
 echo "Evaluating ${ntrain}-shot IndicQA with no context..."
-echo "Results will be stored at ${save_dir}/indicqa/no-context/$ntrain-shot/"
+echo "Results will be stored at ${save_dir}/indicqa/$lang/no-context/$ntrain-shot/"
 python3 -m eval.indicqa.$run_eval \
 	--ntrain $ntrain \
 	--max_context_length 768 \
 	--no_context \
-	--save_dir "${save_dir}/indicqa/no-context/${ntrain}-shot/" \
+	--save_dir "${save_dir}/indicqa/$lang/no-context/${ntrain}-shot/" \
 	--lang $lang \
 	--model_name_or_path $model_name_or_path \
 	--tokenizer_name_or_path $model_name_or_path \
